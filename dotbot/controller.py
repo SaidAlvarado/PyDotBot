@@ -54,7 +54,7 @@ from dotbot.models import (
     MAX_POSITION_HISTORY_SIZE,
 )
 from dotbot.server import web
-from dotbot.lighthouse2 import LighthouseManager, LighthouseManagerState
+from dotbot.lighthouse2 import LighthouseManager, LighthouseManagerState, lh2_4_raw_data_to_counts
 
 
 CONTROLLERS = {}
@@ -400,12 +400,19 @@ class ControllerBase(ABC):
 
         ### TODO ### Handle 4 Lighthouse packet
         if payload.payload_type == PayloadType.LH2_RAW_DATA_4:
+            # Convert the raw data into polynomial counts
+            counts = lh2_4_raw_data_to_counts(payload.values)
             ## Log the raw data values.
-            logger = self.logger.bind(sweep_0_poly = payload.values.locations[0].polynomial_index, sweep_0_off = payload.values.locations[0].offset, sweep_0_bits = payload.values.locations[0].bits)
-            logger = self.logger.bind(sweep_1_poly = payload.values.locations[1].polynomial_index, sweep_1_off = payload.values.locations[1].offset, sweep_1_bits = payload.values.locations[1].bits)
-            logger = self.logger.bind(sweep_2_poly = payload.values.locations[2].polynomial_index, sweep_2_off = payload.values.locations[2].offset, sweep_2_bits = payload.values.locations[2].bits)
-            logger = self.logger.bind(sweep_3_poly = payload.values.locations[3].polynomial_index, sweep_3_off = payload.values.locations[3].offset, sweep_3_bits = payload.values.locations[3].bits)
-            logger.info("lh2-4" )
+            # logger = self.logger.bind(sweep_0_poly = payload.values.locations[0].polynomial_index, sweep_0_off = payload.values.locations[0].offset, sweep_0_bits = counts[0])
+            # logger = self.logger.bind(sweep_1_poly = payload.values.locations[1].polynomial_index, sweep_1_off = payload.values.locations[1].offset, sweep_1_bits = counts[1])
+            # logger = self.logger.bind(sweep_2_poly = payload.values.locations[2].polynomial_index, sweep_2_off = payload.values.locations[2].offset, sweep_2_bits = counts[2])
+            # logger = self.logger.bind(sweep_3_poly = payload.values.locations[3].polynomial_index, sweep_3_off = payload.values.locations[3].offset, sweep_3_bits = counts[3])
+            logger.info("lh2-4" ,
+                        sweep_0_poly = payload.values.locations[0].polynomial_index, sweep_0_off = payload.values.locations[0].offset, sweep_0_bits = counts[0],
+                        sweep_1_poly = payload.values.locations[1].polynomial_index, sweep_1_off = payload.values.locations[1].offset, sweep_1_bits = counts[1],
+                        sweep_2_poly = payload.values.locations[2].polynomial_index, sweep_2_off = payload.values.locations[2].offset, sweep_2_bits = counts[2],
+                        sweep_3_poly = payload.values.locations[3].polynomial_index, sweep_3_off = payload.values.locations[3].offset, sweep_3_bits = counts[3]
+                        )
 
 
 

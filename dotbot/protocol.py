@@ -421,7 +421,7 @@ class ProtocolPayload:
         elif payload_type == PayloadType.LH2_RAW_DATA:
             values = Lh2RawData.from_bytes(bytes_[21:41])
         elif payload_type == PayloadType.LH2_RAW_DATA_4:
-            values = Lh2RawData.from_bytes(bytes_[21:61])
+            values = Lh2RawData_4.from_bytes(bytes_[21:61])
         elif payload_type == PayloadType.LH2_LOCATION:
             values = LH2Location.from_bytes(bytes_[21:33])
         elif payload_type == PayloadType.ADVERTISEMENT:

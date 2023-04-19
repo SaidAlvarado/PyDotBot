@@ -18,7 +18,7 @@ import numpy as np
 
 from dotbot.logger import LOGGER
 from dotbot.models import DotBotLH2Position, DotBotCalibrationStateModel
-from dotbot.protocol import Lh2RawData
+from dotbot.protocol import Lh2RawData, Lh2RawData_4
 
 
 if sys.platform == "win32":
@@ -59,10 +59,33 @@ def _lh2_raw_data_to_counts(raw_data: Lh2RawData, func: callable) -> List[int]:
         )
     return counts
 
+def _lh2_4_raw_data_to_counts(raw_data: Lh2RawData_4, func: callable) -> List[int]:
+    counts = [0] * 4
+    pos_A = 0
+    pos_B = 0
+    for i in range(4):
+        index = 0
+        if raw_data.locations[i].polynomial_index in [0, 1]:
+            index = pos_A
+            pos_A += 1
+        elif raw_data.locations[i].polynomial_index in [2, 3]:
+            index = 2 + pos_B
+            pos_B += 1
+        if index > 3:
+            continue
+        counts[index] = func(
+            raw_data.locations[i].polynomial_index,
+            raw_data.locations[i].bits >> (47 - raw_data.locations[i].offset),
+        )
+    return counts
 
 def lh2_raw_data_to_counts(raw_data: Lh2RawData) -> List[int]:
     """Convert bits sequence to an array of counts."""
     return _lh2_raw_data_to_counts(raw_data, LH2_LIB.reverse_count_p)
+
+def lh2_4_raw_data_to_counts(raw_data: Lh2RawData_4) -> List[int]:
+    """Convert bits sequence to an array of counts."""
+    return _lh2_4_raw_data_to_counts(raw_data, LH2_LIB.reverse_count_p)
 
 
 def calculate_camera_point(count1, count2, poly_in):
