@@ -11,7 +11,7 @@ from typing import List
 from dataclasses import dataclass
 
 
-PROTOCOL_VERSION = 7
+PROTOCOL_VERSION = 9
 
 
 class PayloadType(Enum):
@@ -28,7 +28,10 @@ class PayloadType(Enum):
     LH2_WAYPOINTS = 8
     GPS_WAYPOINTS = 9
     SAILBOT_DATA = 10
-    INVALID_PAYLOAD = 11  # Increase each time a new payload type is added
+    EKF_DEBUG = 11
+    LH2_RAW_DATA_4 = 12
+
+    INVALID_PAYLOAD = 13  # Increase each time a new payload type is added
 
 
 class ApplicationType(IntEnum):
@@ -190,6 +193,28 @@ class Lh2RawData(ProtocolData):
             [
                 Lh2RawLocation.from_bytes(bytes_[0:10]),
                 Lh2RawLocation.from_bytes(bytes_[10:20]),
+            ]
+        )
+
+
+@dataclass
+class Lh2RawData_4(ProtocolData):
+    """Dataclass that holds LH2 raw data."""
+
+    locations: List[Lh2RawLocation] = dataclasses.field(default_factory=lambda: [])
+
+    @property
+    def fields(self) -> List[ProtocolField]:
+        return list(chain(*[location.fields for location in self.locations]))
+
+    @staticmethod
+    def from_bytes(bytes_) -> ProtocolData:
+        return Lh2RawData(
+            [
+                Lh2RawLocation.from_bytes(bytes_[0:10]),
+                Lh2RawLocation.from_bytes(bytes_[10:20]),
+                Lh2RawLocation.from_bytes(bytes_[20:30]),
+                Lh2RawLocation.from_bytes(bytes_[30:40]),
             ]
         )
 
@@ -395,6 +420,8 @@ class ProtocolPayload:
             values = CommandRgbLed.from_bytes(bytes_[21:25])
         elif payload_type == PayloadType.LH2_RAW_DATA:
             values = Lh2RawData.from_bytes(bytes_[21:41])
+        elif payload_type == PayloadType.LH2_RAW_DATA_4:
+            values = Lh2RawData.from_bytes(bytes_[21:61])
         elif payload_type == PayloadType.LH2_LOCATION:
             values = LH2Location.from_bytes(bytes_[21:33])
         elif payload_type == PayloadType.ADVERTISEMENT:
