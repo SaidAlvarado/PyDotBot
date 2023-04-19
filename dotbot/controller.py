@@ -398,6 +398,18 @@ class ControllerBase(ABC):
         else:
             notification = DotBotNotificationModel(cmd=notification_cmd.value)
 
+        ### TODO ### Handle 4 Lighthouse packet
+        if payload.payload_type == PayloadType.LH2_RAW_DATA_4:
+            ## Log the raw data values.
+            logger = self.logger.bind(sweep_0_poly = payload.values.locations[0].polynomial_index, sweep_0_off = payload.values.locations[0].offset, sweep_0_bits = payload.values.locations[0].bits)
+            logger = self.logger.bind(sweep_1_poly = payload.values.locations[1].polynomial_index, sweep_1_off = payload.values.locations[1].offset, sweep_1_bits = payload.values.locations[1].bits)
+            logger = self.logger.bind(sweep_2_poly = payload.values.locations[2].polynomial_index, sweep_2_off = payload.values.locations[2].offset, sweep_2_bits = payload.values.locations[2].bits)
+            logger = self.logger.bind(sweep_3_poly = payload.values.locations[3].polynomial_index, sweep_3_off = payload.values.locations[3].offset, sweep_3_bits = payload.values.locations[3].bits)
+            logger.info("lh2-4" )
+
+
+
+
         if self.settings.verbose is True:
             print(payload)
         self.dotbots.update({dotbot.address: dotbot})
